@@ -1,0 +1,24 @@
+{
+	"version": "2.0.0",
+	"command": "make",
+	"reveal": "always",
+	"tasks": [
+		{
+			"label": "build",
+			"type": "process",
+			"group": "build",
+			"problemMatcher": "$ocamlc"
+		},
+		{
+			"label": "clean",
+			"type": "process",
+			"group": "none"
+		},
+		{
+			"label": "run",
+			"type": "process",
+			"group": "none",
+			"problemMatcher": []
+		}
+	]
+}
