@@ -1,11 +1,10 @@
 .PHONY: pack all run clean
 
-TARGET=parser
-
-SRC_PATH=src/$(TARGET)/
+PARSER_PATH=src/parser/
+NORMZ_PATH=src/normalization/
 #OUT_PATH=out/$(TARGET)/
 
-GENERATED=$(SRC_PATH)parser.mli $(SRC_PATH)parser.ml $(SRC_PATH)lexer.ml
+GENERATED=$(PARSER_PATH)parser.mli $(PARSER_PATH)parser.ml $(PARSER_PATH)lexer.ml
 OCAMLC=ocamlc # ocamlopt for speed
 PACKAGE=hw.zip
 
@@ -20,19 +19,25 @@ all: main.exe
 run: main.exe
 	./main.exe
 
-$(SRC_PATH)tree.cmi:
-	cd $(SRC_PATH) && $(OCAMLC) -c tree.ml
+$(PARSER_PATH)tree.cmi:
+	cd $(PARSER_PATH) && $(OCAMLC) -c tree.ml
 
-main.exe: $(GENERATED) $(SRC_PATH)tree.cmi
-	cd $(SRC_PATH) && $(OCAMLC) tree.ml $(GENERATED:src/parser/%=%) main.ml -o ../../main.exe
+# hw1
+# main.exe: $(GENERATED) $(PARSER_PATH)tree.cmi
+# 	cd $(PARSER_PATH) && $(OCAMLC) tree.ml $(GENERATED:src/parser/%=%) main.ml -o ../../main.exe
+
+# hw2
+main.exe: $(GENERATED) $(PARSER_PATH)tree.cmi
+	cd $(PARSER_PATH) && $(OCAMLC) tree.ml $(GENERATED:src/parser/%=%) ../normalization/main.ml -o ../../main.exe
 
 pack: $(GENERATED)
 	zip $(PACKAGE) -r Makefile src
 
-$(GENERATED): $(SRC_PATH)lexer.mll $(SRC_PATH)parser.mly
-	ocamllex $(SRC_PATH)lexer.mll 
-	ocamlyacc $(SRC_PATH)parser.mly
+$(GENERATED): $(PARSER_PATH)lexer.mll $(PARSER_PATH)parser.mly
+	ocamllex $(PARSER_PATH)lexer.mll 
+	ocamlyacc $(PARSER_PATH)parser.mly
 
 clean:
-	cd $(SRC_PATH) && $(DEL) $(GENERATED:src/parser/%=%) *.c* *.o*
+	cd $(PARSER_PATH) && $(DEL) $(GENERATED:src/parser/%=%) *.c* *.o*
+	cd $(NORMZ_PATH) && $(DEL) $(GENERATED:src/parser/%=%) *.c* *.o*
 	$(DEL) main.exe $(PACKAGE)
