@@ -22,8 +22,38 @@ let string_of_tree tree =
   in s_token tree;
   contents buff;;
 
+let make_name name = name ^ "'";;
 
-let input = read_line ();;
+let change_name expr old_v new_v =
+  let rec walk token = match token with
+    | Apply (t1, t2) -> Apply (walk (t1), walk (t2))
+    | Abstr (v, t)   -> if v = old_v then Abstr (new_v, walk t)
+                        else Abstr (v, walk t)
+    | Var v          -> if (v = old_v) then Var new_v
+                        else token
+    | Nothing        -> token
+  in walk expr;;
+
+let do_reduction expr var in_expr = 
+  let rec walk token = match token with
+    | Abstr (v, t)   -> if v <> var then Abstr (v, walk t)
+                      else Abstr (make_name (v), change_name (t, v, make_name (v)))
+    | Apply (t1, t2) -> Apply (walk(t1), walk(t2))
+    | Var v          -> if v = var then in_expr else token
+    | Nothing        -> token
+  in walk expr;;
+
+let b_reduction tree = match tree with
+    | Abstr (_, _)         -> tree
+    | Var _                -> tree
+    | Nothing              -> Nothing
+    | Apply (expr1, expr2) -> match expr1 with
+      | Abstr (v, expr) -> do_reduction expr v expr2
+      | Apply (_, _)    -> tree
+      | Var _           -> tree
+      | Nothing         -> tree;;
 
 let (>>) x f = f x;;
-input >> Lexing.from_string >> Parser.main Lexer.main >> string_of_tree >> print_string;;
+let input_tree = read_line () >> Lexing.from_string >> Parser.main Lexer.main;;
+
+input_tree >> b_reduction >> string_of_tree >> print_string;;
