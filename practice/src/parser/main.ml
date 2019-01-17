@@ -18,7 +18,7 @@ let string_of_tree tree =
                         add_char   buff '.';
                         s_token t;
                         add_char   buff ')'
-    | Nothing        -> add_string buff ""
+    (* | Nothing        -> add_string buff "" *)
   in s_token tree;
   contents buff;;
 

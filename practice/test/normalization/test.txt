@@ -1,0 +1,60 @@
+(\x.x) z
+z
+
+(\x.y) z
+y
+
+(\a.\a.b) c
+(\a.b)
+
+(\a.\x.a) (x y)
+(\x’.(x y))
+
+(\a.a) x y
+(x y)
+
+(\a.\b.a) (x y)
+(\b.(x y))
+
+((\x . x (\x . x)) y)
+(( y ) ( \x . (x) ))
+
+(\x . x)
+(\x . (x))
+
+((\x.\y.\z.x z (y z)) (\x.\y.x) (\x.x))
+(\z . (z))
+
+(\x.\z.x z) (\x.\z.x)
+\x.\z.x
+
+(\x.((\y.y) z))
+(\x.z)
+
+((\x.\y.y x) ((\x.x x) (\x.x x))) (\x.a)
+a
+
+(\a.(\k.(a k))) (\u.(\i.(\k.(u i))) k)
+(\k'.(\k''.(k' k)))
+
+(\n.\f.\x.n (\g.\h.h (g f)) (\u.x) (\u.u)) (\f.\x.f (f (f x)))
+(\f . (\x . (( f ) ( ( f ) ( x ) ))))
+
+((\s.\k.k s) (\x.\y.\z.x z (y z)) (\x.\y.x))
+(\y . (\x . (\a2 . (\z . (( ( x ) ( z ) ) ( ( a2 ) ( z ) ))))))
+
+((\n.\f.\x.n (\g.\h.h (g f)) (\u.x) (\u.u)) (\f.\x.f (f (f x))))
+(\f . (\x . (( f ) ( ( f ) ( x ) ))))
+
+((\y.\m.y (\f.\n.(\s.(s (\x.\a.\b.b) (\a.\b.a)) (\f.\x.x) (f s)) (m n)) (\f.\x.f (f (f x)))) (\f.(\x.f (x x)) (\x.f (x x))) ((\n.\f.\x.n (\g.\h.h (g f)) (\u.x) (\u.u))))
+(\f . (\a4 . (a4)))
+
+d d (d \d.\d.o o) (d) \o.((\d.d o)) \d.\o.(d d (d \o.d) \d.o (o) \d.o o) \d.(\o.o) \o.o d d
+((((d d) (d (\d.(\d.(o o))))) d) (\o.(\o'.((((o o) (o (\o'.o))) (\d.((o' o') (\d.(o' o'))))) (\d.(\o'.((o' d) d)))))))
+((((d d) (d (\d.(\d.(o o))))) d) (\o.(\o'.((((o o) (o (\o'.o))) (\d.((o o) (\d.(o o))))) (\d.(\o.((o d) d)))))))
+
+(\s.\k.\i.(s (s (k s) (s (k k) (s (k s) (s (k k) i)))) (k (s (s (k s) (s (k (s (k s))) (s (k (s (k k))) (s (k (s (k s))) (s (s (k s) (s (k (s (k s))) (s (k (s (s (k s) (s (k k) i)))) (s (k k) (s (s (k s) (s (k k) i)) (k i)))))) (k (k (k (k i))))))))) (s (k k) (s (k (s (k (s (k (s (s (k s) (s (k (s (k s))) (s (k (s (k k))) (s (s (k s) (s (k k) i)) (k i))))) (k (s (s (k s) (s (k k) i)) (k i))))))))) (s (k (s (s (k s) (s (k k) i)))) (s (k k) (s (s (k s) (s (k k) i)) (s (s (k s) (s (k k) i)) (k i))))))))) (s (s (s (k s) (s (k k) i)) (k (s i i))) (s (s (k s) (s (k k) i)) (k (s i i)))) (s (s (k s) (s (k (s (k s))) (s (s (k s) (s (k (s (k s))) (s (k (s (k k))) (s (s (k s) (s (k k) i)) (k (s (k (s (k (s i)))) (s (k (s (k k))) (s (k (s i)) (s (k k) i))))))))) (k (k k))))) (k (k (k i)))) (s (s i (k (k (k i)))) (k k)) (s (s (k s) (s (k k) i)) (s (s (k s) (s (k k) i)) (s (s (k s) (s (k k) i)) (s (s (k s) (s (k k) i)) (s (s (k s) (s (k k) i)) ( ( ( (k i))))))))))) (\x.\y.\z.x z (y z)) (\x.\y.x) (\x.x)
+
+
+((\s.\k.\i.(((s ((s (k s)) ((s ((s (k s)) ((s (k k)) i))) (k ((s (k (s ((s (k s)) ((s (k (s (k (s ((s ((s ((s i) (k (k (k i))))) (k ((s (k k)) i)))) (k ((s ((s (k s)) ((s (k k)) i))) (k i))))))))) ((s ((s (k s)) ((s (k k)) ((s (k s)) ((s (k (s (k ((s ((s (k s)) ((s (k k)) ((s (k s)) ((s (k k)) i))))) (k ((s ((s (k s)) ((s (k k)) i))) (k i)))))))) ((s ((s (k s)) ((s (k k)) i))) (k i))))))) (k ((s (k k)) i)))))))) ((s (k k)) ((s ((s (k s)) ((s (k k)) i))) (k i)))))))) (k (k ((s ((s (k s)) ((s (k k)) i))) ((s ((s (k s)) ((s (k k)) i))) ((s ((s (k s)) ((s (k k)) i))) (k i))))))) ((s ((s ((s (k s)) ((s (k k)) i))) (k ((s i) i)))) ((s ((s (k s)) ((s (k k)) i))) (k ((s i) i))))) ((s ((s (k s)) ((s (k (s (k s)))) ((s ((s (k s)) ((s (k (s (k s)))) ((s (k (s (k k)))) ((s ((s (k s)) ((s (k k)) i))) (k ((s (k (s (k (s i))))) ((s (k (s (k k)))) ((s (k (s i))) ((s (k k)) i)))))))))) (k (k ((s (k k)) i))))))) (k (k (k i))))) (\x.\y.\z.x z (y z)) (\x.\y.x) (\x.x))
+(\a595 . \a1689 . a595 (a595 (a595 (a595 (a595 (a595 a1689))))))

@@ -11,7 +11,6 @@
 
 main:
         | expr EOF                        { $1 }
-        | EOF                             { Nothing }
 
 expr:
         | apply                         { $1 }
