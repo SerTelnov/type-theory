@@ -2,6 +2,7 @@
 
 PARSER_PATH=src/parser/
 NORMZ_PATH=src/normalization/
+TYPE_PATH=src/type_inference/
 #OUT_PATH=out/$(TARGET)/
 
 GENERATED=$(PARSER_PATH)parser.mli $(PARSER_PATH)parser.ml $(PARSER_PATH)lexer.ml
@@ -27,8 +28,12 @@ $(PARSER_PATH)tree.cmi:
 # 	cd $(PARSER_PATH) && $(OCAMLC) tree.ml $(GENERATED:src/parser/%=%) main.ml -o ../../main.exe
 
 # hw2
+# main.exe: $(GENERATED) $(PARSER_PATH)tree.cmi
+# 	cd $(PARSER_PATH) && $(OCAMLC) tree.ml $(GENERATED:src/parser/%=%) ../normalization/main.ml -o ../../main.exe
+
+# hw3
 main.exe: $(GENERATED) $(PARSER_PATH)tree.cmi
-	cd $(PARSER_PATH) && $(OCAMLC) tree.ml $(GENERATED:src/parser/%=%) ../normalization/main.ml -o ../../main.exe
+	cd $(PARSER_PATH) && $(OCAMLC) tree.ml $(GENERATED:src/parser/%=%) ../type_inference/main.ml -o ../../main.exe
 
 pack: $(GENERATED)
 	zip $(PACKAGE) -r Makefile src
@@ -39,5 +44,6 @@ $(GENERATED): $(PARSER_PATH)lexer.mll $(PARSER_PATH)parser.mly
 
 clean:
 	cd $(PARSER_PATH) && $(DEL) $(GENERATED:src/parser/%=%) *.c* *.o*
-	cd $(NORMZ_PATH) && $(DEL) $(GENERATED:src/parser/%=%) *.c* *.o*
+	cd $(NORMZ_PATH) && $(DEL) *.c* *.o*
+	cd $(TYPE_PATH) && $(DEL) *.c* *.o*
 	$(DEL) main.exe $(PACKAGE)

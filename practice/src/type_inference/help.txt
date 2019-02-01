@@ -1,0 +1,25 @@
+(* let print_type token =
+  let rec walk t = match t with
+    | Impl (v1, v2) -> print_string "(";
+                        walk v1;
+                        print_string " -> ";
+                        walk v2;
+                        print_string ")";
+    | Var v         -> print_string v
+  in walk token;;
+
+let println_type t = print_type t;
+  print_string "\n";;
+
+let println_equation eq = match eq with
+  | Equality (t1, t2) ->  print_type t1;
+                          print_string " = ";
+                          print_type t2;
+                          print_string "\n";;
+
+let print_system tpair = 
+  let rec walk pair = match pair with
+    | TPair (system, t) ->  println_type t;
+                            List.iter (fun eq -> println_equation eq) system;
+                            print_string "\n";
+  in walk tpair;; *)

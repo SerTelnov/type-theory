@@ -1,3 +1,5 @@
 # build files
 out/*
 .vscode/*
+
+.DS_Store
