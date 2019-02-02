@@ -23,3 +23,17 @@ let print_system tpair =
                             List.iter (fun eq -> println_equation eq) system;
                             print_string "\n";
   in walk tpair;; *)
+
+
+  (* let s1 = system >> swap_vars in
+    print_string "swap\n";
+    print_system s1;
+    let s2 = s1 >> reduction in
+    print_string "reduction\n";
+    print_system s2;
+    let s3 = s2 >> substitution in
+    print_string "substition\n";
+    print_system s3;
+    let s4 = s3 >> remove_equils in
+    print_string "remove_equals\n";
+    print_system s4; *)
