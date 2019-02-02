@@ -6,6 +6,8 @@ open Hashtbl;;
 
 module StrSet = Set.Make(String);;
 
+let (>>) x f = f x;;
+
 type system_type = 
   | Impl of system_type * system_type
   | Var of string;;
@@ -32,20 +34,77 @@ let get_system tpair = match tpair with
 let get_type tpair = match tpair with
   | TPair (system, t) -> t;;
 
+(* print block  *)
+
+let print_type token =
+  let rec walk t = match t with
+    | Impl (v1, v2) -> print_string "(";
+                        walk v1;
+                        print_string " -> ";
+                        walk v2;
+                        print_string ")";
+    | Var v         -> print_string v
+  in walk token;;
+
+let println_type t = print_type t;
+  print_string "\n";;
+
+let println_equation eq = match eq with
+  | Equality (t1, t2) ->  print_type t1;
+                          print_string " = ";
+                          print_type t2;
+                          print_string "\n";;
+
+let print_system tpair = 
+  let rec walk pair = match pair with
+    | TPair (system, t) ->  println_type t;
+                            List.iter (fun eq -> println_equation eq) system;
+                            print_string "\n";
+  in walk tpair;;
+
+let string_of_tree tree =
+  let buff = Buffer.create 100000 in
+  let rec s_token token = match token with
+    | Apply (t1, t2) -> add_char   buff '(';
+                        s_token t1;
+                        add_char   buff ' ';
+                        s_token t2;
+                        add_char   buff ')'
+    | Abstr (v, t)   -> add_string buff "(\\";
+                        add_string buff v;
+                        add_char   buff '.';
+                        s_token t;
+                        add_char   buff ')'
+    | Var v          -> add_string buff v
+  in s_token tree;
+  contents buff;;
+
+let string_of_type t = 
+  let buff = Buffer.create 10000 in
+  let rec walk token = (match token with
+    | Impl (p, q) -> add_char buff '(';
+                     walk p;
+                     add_string buff " -> ";
+                     walk q;
+                     add_char buff ')';
+    | Var v       -> add_string buff v) 
+  in walk t;
+  contents buff;;
 
 (* create system block *)
 
 let cnt = ref 0;;
+let clr () = cnt := 0
 let inc () = cnt := !cnt + 1; !cnt;;
 
 let make_var hash var = if Hashtbl.mem hash var then
                           Hashtbl.find hash var 
                         else 
-                          let name = "a" ^ (string_of_int (inc ())) in
+                          let name = "t" ^ (string_of_int (inc ())) in
                             Hashtbl.add hash var name;
-                            name;;      
+                            name;;    
 
-let make_new_var () = "a" ^ (string_of_int (inc ()));;
+let make_new_var () = "t" ^ (string_of_int (inc ()));;
 
 let set_system tree = 
   let table = Hashtbl.create 100 in
@@ -193,10 +252,83 @@ let rec solve_system system =
     else [];;
 
 
-let (>>) x f = f x;;
-
 let input = read_line ();;
 let input_tree = input >> Lexing.from_string >> Parser.main Lexer.main;;
 
-let tpair = input_tree >> set_system;;
+let tpair = set_system input_tree;;
+print_string "start system:\n";;
+print_system tpair;;
+
 let solved_system = tpair >> get_system >> solve_system;;
+
+let solved_pair = TPair(solved_system, get_type tpair);;
+print_string "solved system:\n";;
+print_system solved_pair;;
+
+let hash_system system = 
+  let hash = Hashtbl.create 100 in
+    let rec loop s = match s with   
+      | el :: values -> (match el with 
+        | Equality (l, r) -> 
+          let var = get_eq_var el in 
+            Hashtbl.add hash var r;
+          loop values)
+      | [] -> () in
+  loop system;
+  hash;;
+
+let print_proof system t = 
+  let hash_var = Hashtbl.create 100 in
+  let hash_sys = hash_system system in
+  clr ();
+
+  let get_var_type var = if Hashtbl.mem hash_sys var 
+    then Hashtbl.find hash_sys var
+    else Var var in
+
+  let rec make_type_list token = (match token with
+    | Apply (p, q) -> let lp = make_type_list p in
+                        let lq = make_type_list q in
+                          let ctp = get_var_type (make_new_var ()) in
+                           ctp :: (List.append lp lq)
+    | Abstr (v, p) -> let lst = make_type_list p in
+                        let pt = List.hd lst in
+                          let vt = get_var_type (make_var hash_var v) in 
+                            let ct = Impl (vt, pt) in
+                              ct :: lst
+    | Var v        -> let var = make_var hash_var v in
+                        [get_var_type (var)]) in
+
+  let rec add_indent buff i = (if i > 0 then 
+    begin
+      Buffer.add_string buff "*   ";
+      add_indent buff (i - 1);
+    end) in
+
+  let rec buff_proof token list buff i = (match list with
+      | cur_type :: vls -> (
+        add_indent buff i;
+        let tree_str = string_of_tree token in 
+          let type_str = string_of_type cur_type in
+          Buffer.add_string buff (tree_str ^ " : " ^ type_str);
+          match token with
+            | Var _        -> Buffer.add_string buff " [rule #1]\n";
+                              vls
+            | Apply (p, q) -> Buffer.add_string buff " [rule #2]\n";
+                              let plist = buff_proof p vls buff (i + 1) in
+                                buff_proof q plist buff (i + 1)
+            | Abstr (_, p) -> Buffer.add_string buff " [rule #3]\n";
+                              buff_proof p vls buff (i + 1))
+      | [] -> []) in
+  let buff = Buffer.create 1000000 in
+    buff_proof input_tree (make_type_list input_tree) buff 0;
+    Buffer.add_char buff '\n';
+    let proof = Buffer.contents buff in
+      print_string proof;;
+
+let solve system t = 
+  if (List.length system) = 0 then 
+    print_string "Expression has no type\n"
+  else print_proof system t;;
+
+solve solved_system (get_type tpair);;
