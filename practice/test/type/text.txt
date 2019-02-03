@@ -1,0 +1,13 @@
+x
+
+(\x.x) (\y.y)
+
+\a.a' a z8'
+
+// test 6
+(\x. \y. x) (\z. z)
+
+\f.\x.f (f x)
+
+// test 17
+(\n.\f.\x.f(n f x)) (\f. \x.f(f(x)))

@@ -12,16 +12,23 @@ type system_type =
   | Impl of system_type * system_type
   | Var of string;;
 
-type equation = Equality of system_type * system_type;;
+type equation = Equality of system_type * system_type | ErrorEquation;;
 type system = equation list;;
 
-type tpair = TPair of system * system_type;;            
+type tpair = TPair of system * system_type;;
+
+let error_system = [ErrorEquation];;
 
 let get_eq_if b eq = match eq with
-  | Equality (l, r) -> if b then r else l;;
+  | Equality (l, r) -> if b then r else l
+  | ErrorEquation -> Var "x";;
 
 let get_eq_left  = get_eq_if false;;
 let get_eq_right = get_eq_if true;;
+
+let get_type_left t = match t with
+  | Impl (l, r) -> l
+  | Var v       -> t;;
 
 let get_eq_var eq = 
   let t = get_eq_left eq in match t with
@@ -53,7 +60,8 @@ let println_equation eq = match eq with
   | Equality (t1, t2) ->  print_type t1;
                           print_string " = ";
                           print_type t2;
-                          print_string "\n";;
+                          print_string "\n"
+  | ErrorEquation     ->  ();;
 
 let print_system tpair = 
   let rec walk pair = match pair with
@@ -135,11 +143,12 @@ let set_system tree =
 
 let remove_equils system = 
   let is_removed eq = match eq with
-    | Equality (t1, t2) -> match t1 with
+    | Equality (t1, t2) -> (match t1 with
       | Impl _  -> false
       | Var x   -> (match t2 with
         | Impl _  -> false
-        | Var y   -> if x = y then true else false) in
+        | Var y   -> if x = y then true else false))
+    | ErrorEquation -> false in
     
     let rec loop s = match s with
       | el :: values  -> let next = loop values in
@@ -148,12 +157,13 @@ let remove_equils system =
   in loop system;;
 
 let swap_vars system = 
-  let swap_eq eq = match eq with
+  let swap_eq eq = (match eq with
     | Equality (t1, t2) -> (match t1 with
       | Var x   -> eq
       | Impl _  -> (match t2 with
         | Var y   -> Equality (t2, t1)
-        | Impl _  -> eq)) in
+        | Impl _  -> eq))
+    | ErrorEquation -> eq) in
     List.map (fun eq -> swap_eq eq) system;;
 
 let reduction system =
@@ -192,9 +202,10 @@ let contain_var system var n =
 
 let substitution system = 
   let is_to_sub eq = (match eq with
-    | Equality (t1, _) -> match t1 with
+    | Equality (t1, _) -> (match t1 with
       | Impl _ -> false  
-      | Var x  -> true) in 
+      | Var x  -> true)
+    | ErrorEquation -> false) in 
   let rec loop cur_sys n = match cur_sys with
     | el :: values -> 
       if is_to_sub el then 
@@ -232,38 +243,39 @@ let is_compatible system =
 
 let is_decidability system =
   let correct_form eq = (match eq with
-    | Equality (l, r) -> match l with
+    | Equality (l, r) -> (match l with
       | Impl _ -> false
-      | Var _  -> true) in
-  let rec loop s var_set = match s with
+      | Var _  -> true)
+    | ErrorEquation -> false) in
+
+  let rec add_right set token = (match token with
+    | Impl (p, q) -> add_right set p;
+                     add_right set q;
+    | Var v       -> StrSet.add v set) in 
+
+  let rec find_vars set token = (match token with
+    | Impl (p, q) -> find_vars set p || find_vars set q
+    | Var v       -> if StrSet.mem v set then true else false) in
+
+  let rec loop s lvar_set rvar_set = match s with
     | el :: values ->
       if correct_form el then
         let cur_var = get_eq_var el in
-          if StrSet.mem cur_var var_set then false
-          else loop values (StrSet.add cur_var var_set)
+          if StrSet.mem cur_var lvar_set || StrSet.mem cur_var rvar_set then false
+          else let right = get_eq_right el in
+            let upd_rset = add_right rvar_set right in
+              if find_vars lvar_set right
+                then false
+                else loop values (StrSet.add cur_var lvar_set) upd_rset
       else false
     | [] -> true
-  in loop system StrSet.empty;;
+  in loop system StrSet.empty StrSet.empty;;
 
 let rec solve_system system = 
   let ns = system >> swap_vars >> reduction >> substitution >> remove_equils in
     if is_compatible ns then
       if is_decidability ns then ns else solve_system ns
-    else [];;
-
-
-let input = read_line ();;
-let input_tree = input >> Lexing.from_string >> Parser.main Lexer.main;;
-
-let tpair = set_system input_tree;;
-print_string "start system:\n";;
-print_system tpair;;
-
-let solved_system = tpair >> get_system >> solve_system;;
-
-let solved_pair = TPair(solved_system, get_type tpair);;
-print_string "solved system:\n";;
-print_system solved_pair;;
+    else error_system;;
 
 let hash_system system = 
   let hash = Hashtbl.create 100 in
@@ -272,13 +284,13 @@ let hash_system system =
         | Equality (l, r) -> 
           let var = get_eq_var el in 
             Hashtbl.add hash var r;
-          loop values)
+          loop values
+        | ErrorEquation -> ())
       | [] -> () in
   loop system;
   hash;;
 
-let print_proof system t = 
-  let hash_var = Hashtbl.create 100 in
+let print_proof system input_tree = 
   let hash_sys = hash_system system in
   clr ();
 
@@ -286,18 +298,21 @@ let print_proof system t =
     then Hashtbl.find hash_sys var
     else Var var in
 
-  let rec make_type_list token = (match token with
-    | Apply (p, q) -> let lp = make_type_list p in
-                        let lq = make_type_list q in
-                          let ctp = get_var_type (make_new_var ()) in
-                           ctp :: (List.append lp lq)
-    | Abstr (v, p) -> let lst = make_type_list p in
-                        let pt = List.hd lst in
-                          let vt = get_var_type (make_var hash_var v) in 
-                            let ct = Impl (vt, pt) in
-                              ct :: lst
-    | Var v        -> let var = make_var hash_var v in
-                        [get_var_type (var)]) in
+  let type_list = (let hash_var = Hashtbl.create 100 in 
+    let rec make_type_list token = (match token with
+      | Abstr (v, p) -> let lst = make_type_list p in
+                          let pt = List.hd lst in
+                            let vt = get_var_type (make_var hash_var v) in 
+                              let ct = Impl (vt, pt) in
+                                Hashtbl.remove hash_var v;
+                                ct :: lst
+      | Apply (p, q) -> let lp = make_type_list p in
+                          let lq = make_type_list q in
+                            let ctp = get_var_type (make_new_var ()) in
+                              ctp :: (List.append lp lq)
+      | Var v        -> let var = make_var hash_var v in
+                          [get_var_type (var)]) 
+  in make_type_list input_tree) in
 
   let rec add_indent buff i = (if i > 0 then 
     begin
@@ -305,30 +320,72 @@ let print_proof system t =
       add_indent buff (i - 1);
     end) in
 
-  let rec buff_proof token list buff i = (match list with
+  let add_abst_var buff abst_var is_comma = (if is_comma && List.length abst_var > 0 then Buffer.add_string buff ", ";
+    let rec loop vars = match vars with
+      | el :: vls -> Buffer.add_string buff el;
+                        let end_str = if List.length vls > 0 then ", " else " " 
+                          in Buffer.add_string buff end_str;
+                    loop vls
+      | []           -> () in loop abst_var) in
+
+  let free_var_str =
+    (let buff = Buffer.create 10000 in
+      let rec loop token vars used_vars = match vars with
+        | tp :: vls -> (match token with
+          | Apply (p, q) -> let pl = loop p vls used_vars in
+                              loop q pl used_vars
+          | Abstr (v, p) -> loop p vls (StrSet.add v used_vars)
+          | Var v        -> if StrSet.mem v used_vars then () 
+                            else begin
+                              if Buffer.length buff > 0 then Buffer.add_string buff ", ";
+                              Buffer.add_string buff v;
+                              Buffer.add_string buff " : ";
+                              Buffer.add_string buff (string_of_type tp);                               
+                            end;
+                            vls)
+        | [] -> []
+    in loop input_tree type_list StrSet.empty;
+    if Buffer.length buff > 0 then Buffer.add_char buff ' ';
+    Buffer.contents buff) in
+    
+  let rec buff_proof token list buff i abst_var = (match list with
       | cur_type :: vls -> (
         add_indent buff i;
+        Buffer.add_string buff free_var_str;
+        add_abst_var buff abst_var (String.length free_var_str > 0);
         let tree_str = string_of_tree token in 
           let type_str = string_of_type cur_type in
-          Buffer.add_string buff (tree_str ^ " : " ^ type_str);
+          Buffer.add_string buff ("|- " ^ tree_str ^ " : " ^ type_str);
           match token with
             | Var _        -> Buffer.add_string buff " [rule #1]\n";
                               vls
             | Apply (p, q) -> Buffer.add_string buff " [rule #2]\n";
-                              let plist = buff_proof p vls buff (i + 1) in
-                                buff_proof q plist buff (i + 1)
-            | Abstr (_, p) -> Buffer.add_string buff " [rule #3]\n";
-                              buff_proof p vls buff (i + 1))
+                              let plist = buff_proof p vls buff (i + 1) abst_var in
+                                buff_proof q plist buff (i + 1) abst_var
+            | Abstr (v, p) -> Buffer.add_string buff " [rule #3]\n";
+                              buff_proof p vls buff (i + 1) ((v ^ " : " ^ (string_of_type (get_type_left cur_type))) :: abst_var))
       | [] -> []) in
   let buff = Buffer.create 1000000 in
-    buff_proof input_tree (make_type_list input_tree) buff 0;
-    Buffer.add_char buff '\n';
+    buff_proof input_tree type_list buff 0 [];
     let proof = Buffer.contents buff in
       print_string proof;;
 
-let solve system t = 
-  if (List.length system) = 0 then 
+let solve system tree = 
+  if system = error_system then 
     print_string "Expression has no type\n"
-  else print_proof system t;;
+  else print_proof system tree;;
 
-solve solved_system (get_type tpair);;
+let input = read_line ();;
+let input_tree = input >> Lexing.from_string >> Parser.main Lexer.main;;
+
+let tpair = set_system input_tree;;
+(* print_string "start system:\n";;
+print_system tpair;; *)
+
+let solved_system = tpair >> get_system >> solve_system;;
+
+let solved_pair = TPair(solved_system, get_type tpair);;
+(* print_string "solved system:\n";;
+print_system solved_pair;; *)
+
+solve solved_system input_tree;;

@@ -51,7 +51,6 @@ a
 
 d d (d \d.\d.o o) (d) \o.((\d.d o)) \d.\o.(d d (d \o.d) \d.o (o) \d.o o) \d.(\o.o) \o.o d d
 ((((d d) (d (\d.(\d.(o o))))) d) (\o.(\o'.((((o o) (o (\o'.o))) (\d.((o' o') (\d.(o' o'))))) (\d.(\o'.((o' d) d)))))))
-((((d d) (d (\d.(\d.(o o))))) d) (\o.(\o'.((((o o) (o (\o'.o))) (\d.((o o) (\d.(o o))))) (\d.(\o.((o d) d)))))))
 
 (\s.\k.\i.(s (s (k s) (s (k k) (s (k s) (s (k k) i)))) (k (s (s (k s) (s (k (s (k s))) (s (k (s (k k))) (s (k (s (k s))) (s (s (k s) (s (k (s (k s))) (s (k (s (s (k s) (s (k k) i)))) (s (k k) (s (s (k s) (s (k k) i)) (k i)))))) (k (k (k (k i))))))))) (s (k k) (s (k (s (k (s (k (s (s (k s) (s (k (s (k s))) (s (k (s (k k))) (s (s (k s) (s (k k) i)) (k i))))) (k (s (s (k s) (s (k k) i)) (k i))))))))) (s (k (s (s (k s) (s (k k) i)))) (s (k k) (s (s (k s) (s (k k) i)) (s (s (k s) (s (k k) i)) (k i))))))))) (s (s (s (k s) (s (k k) i)) (k (s i i))) (s (s (k s) (s (k k) i)) (k (s i i)))) (s (s (k s) (s (k (s (k s))) (s (s (k s) (s (k (s (k s))) (s (k (s (k k))) (s (s (k s) (s (k k) i)) (k (s (k (s (k (s i)))) (s (k (s (k k))) (s (k (s i)) (s (k k) i))))))))) (k (k k))))) (k (k (k i)))) (s (s i (k (k (k i)))) (k k)) (s (s (k s) (s (k k) i)) (s (s (k s) (s (k k) i)) (s (s (k s) (s (k k) i)) (s (s (k s) (s (k k) i)) (s (s (k s) (s (k k) i)) ( ( ( (k i))))))))))) (\x.\y.\z.x z (y z)) (\x.\y.x) (\x.x)
 
