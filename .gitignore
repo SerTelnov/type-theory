@@ -1,5 +1,7 @@
 # build files
 out/*
 .vscode/*
+*.ibc
+*.exe
 
 .DS_Store
